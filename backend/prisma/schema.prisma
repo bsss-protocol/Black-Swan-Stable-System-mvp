@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  walletAddress   String    @unique
+  email           String?   @unique
+  username        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  deposits        Deposit[]
+  withdrawals     Withdrawal[]
+}
+
+model Deposit {
+  id              String    @id @default(cuid())
+  userId          String
+  amount          Float     // USDC金额
+  txHash          String    @unique
+  status          String    @default("pending") // pending, confirmed, failed
+  blockNumber     Int?
+  user            User      @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+}
+
+model Withdrawal {
+  id              String    @id @default(cuid())
+  userId          String
+  amount          Float     // ETH金额
+  txHash          String    @unique
+  status          String    @default("pending")
+  blockNumber     Int?
+  user            User      @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+}
+
+model ProtocolStats {
+  id              Int       @id @default(autoincrement())
+  totalDeposited  Float     @default(0)
+  totalWithdrawn  Float     @default(0)
+  activeUsers     Int       @default(0)
+  defenseTriggers Int       @default(0)
+  updatedAt       DateTime  @default(now()) @updatedAt
+}
+
+model PriceHistory {
+  id              Int       @id @default(autoincrement())
+  ethPrice        Float
+  defensePrice    Float
+  source          String    @default("chainlink")
+  timestamp       DateTime  @default(now())
+  blockNumber     Int?
+}
