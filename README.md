@@ -1,1 +1,0 @@
-# Black-Swan-Stable-System-mvp
